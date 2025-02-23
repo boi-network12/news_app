@@ -17,7 +17,7 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const { user } = useContext(AuthContext);
   const { posts, loading, fetchPosts } = useContext(PostContext); 
-  const { notifications } = useContext(NotificationContext);
+  const { notifications, fetchNotifications } = useContext(NotificationContext);
   const router = useRouter();
 
   const unreadCount = notifications.filter(notification => !notification.read).length;
@@ -25,6 +25,7 @@ export default function HomeScreen() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchPosts(); 
+    await fetchNotifications();
     setRefreshing(false);
   }, [fetchPosts]);
 
