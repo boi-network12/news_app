@@ -34,7 +34,7 @@ export default function HomeScreen() {
     if (category === "All News") {
       return posts || [];
     } else if (category === "Trending") {
-      return posts.slice().sort((a, b) => b.likesCount - a.likesCount) || [];
+      return posts.slice().sort((a, b) => b.likeCount - a.likeCount) || [];
     } else {
       return posts.filter(post => post.category === category) || [];
     }
