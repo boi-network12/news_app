@@ -12,8 +12,8 @@ import * as Linking from 'expo-linking';
 
 
 export default function NewsDetails() {
-  const { title, image, likes, content, postId } = useLocalSearchParams();
-  const [liked, setLiked] = useState(likes > 0);
+  const { title, image, likes=[], content, postId } = useLocalSearchParams();
+  const [liked, setLiked] = useState(Array.isArray(likes) && likes.includes(user?._id));
   const router = useRouter();
   const { likePost, dislikePost, deletePost } = useContext(PostContext)
   const { user } = useContext(AuthContext)
