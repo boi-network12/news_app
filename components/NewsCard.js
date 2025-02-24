@@ -3,10 +3,10 @@ import React from 'react'
 import { Link } from "expo-router";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen'
 
-export default function NewsCard({ title, image, likes, content, postId }) {
+export default function NewsCard({ title, image, likes, content, postId, author }) {
 
   return (
-    <Link href={{ pathname: "/newsDetails", params: { title, image, likes, content, postId } }} asChild>
+    <Link href={{ pathname: "/newsDetails", params: { title, image, likes, content, postId, author } }} asChild>
       <TouchableOpacity style={styles.card}>
         <Image source={{ uri: image }} style={styles.image} />
         <View style={styles.info}>

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
 import React, { useContext, useState } from 'react';
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
@@ -12,11 +12,15 @@ import * as Linking from 'expo-linking';
 
 
 export default function NewsDetails() {
-  const { title, image, likes=[], content, postId } = useLocalSearchParams();
+  const { title, image, likes=[], content, postId, author } = useLocalSearchParams();
   const [liked, setLiked] = useState(Array.isArray(likes) && likes.includes(user?._id));
   const router = useRouter();
-  const { likePost, dislikePost, deletePost } = useContext(PostContext)
+  const { likePost, dislikePost, deletePost, updatePost } = useContext(PostContext)
   const { user } = useContext(AuthContext)
+
+  const [showModal, setShowModal] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(title);
+  const [editedContent, setEditedContent] = useState(content);
 
   const handleLike = async () => {
     setLiked(true); // Update the liked state
@@ -54,7 +58,18 @@ export default function NewsDetails() {
     router.back();
   };
 
-  
+  const handleEdit = () => {
+    setShowModal(true)
+  }
+
+  const handleSaveEdit = async () => {
+    try {
+      await updatePost(postId, { title: editedTitle, content: editedContent });
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error updating post:", error);
+    }
+  };
   
 
   return (
@@ -66,13 +81,18 @@ export default function NewsDetails() {
           <Feather name="chevron-left" size={hp(3.5)} color="black" />
         </TouchableOpacity>
         <View style={styles.actionBtn} >
-          {user && user.role === "admin" && (
+          {user && (user?.role === "admin" || user?._id === state?.author) && (
             <TouchableOpacity onPress={handleDelete}>
-                <Feather name="trash-2" size={hp(3)} color="red" />
+                <Feather name="trash-2" size={hp(2.5)} color="red" />
+            </TouchableOpacity>
+          )}
+          {user && (user?.role === "admin" || user?._id === state?.author) && (
+            <TouchableOpacity onPress={handleEdit}>
+              <Feather name="edit" size={hp(2.5)}/>
             </TouchableOpacity>
           )}
           <TouchableOpacity onPress={handleShare}>
-            <Feather name="share-2" size={hp(3.5)} />
+            <Feather name="share-2" size={hp(2.5)} />
           </TouchableOpacity>
         </View>
       </View>
@@ -121,6 +141,34 @@ export default function NewsDetails() {
         </ParsedText>
 
       </ScrollView>
+      {/* Edit Modal */}
+      <Modal visible={showModal} transparent animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TextInput
+              style={styles.input}
+              value={editedTitle}
+              onChangeText={setEditedTitle}
+              placeholder="Edit Title"
+            />
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={editedContent}
+              onChangeText={setEditedContent}
+              placeholder="Edit Content"
+              multiline
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => setShowModal(false)}>
+                <Text style={styles.cancelButton}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleSaveEdit}>
+                <Text style={styles.saveButton}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -185,11 +233,46 @@ const styles = StyleSheet.create({
   },
   link: {
     color: "#007AFF",  // A cool blue color
-  fontWeight: "bold",
-  textDecorationLine: "underline",
-  backgroundColor: "#E5F1FF", // Light blue background for visibility
-  paddingHorizontal: wp(2),
-  paddingVertical: hp(0.5),
-  borderRadius: wp(2),
-  },
+    fontWeight: "bold",
+    textDecorationLine: "underline",
+    backgroundColor: "#E5F1FF", // Light blue background for visibility
+    paddingHorizontal: wp(2),
+    paddingVertical: hp(0.5),
+    borderRadius: wp(2),
+    },
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    modalContent: {
+      width: '80%',
+      backgroundColor: 'white',
+      padding: 20,
+      borderRadius: 10,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: '#ddd',
+      padding: 10,
+      borderRadius: 5,
+      marginBottom: 10,
+    },
+    textArea: {
+      height: 100,
+    },
+    modalActions: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 10,
+    },
+    cancelButton: {
+      color: 'red',
+      fontWeight: 'bold',
+    },
+    saveButton: {
+      color: 'blue',
+      fontWeight: 'bold',
+    },
 });
