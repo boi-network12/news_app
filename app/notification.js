@@ -122,8 +122,20 @@ export default function Notification() {
                 )}
                 
                 <View style={styles.notificationTextContainer}>
-                  <Text style={styles.notificationTitle}>{item.title}</Text>
-                  <Text style={styles.notificationMessage}>{item.message}</Text>
+                  <Text style={styles.notificationTitle} 
+                     numberOfLines={1}
+                     ellipsizeMode='tail'
+
+                  >
+                       {item.title}
+                    </Text>
+                  <Text 
+                     style={styles.notificationMessage}
+                     numberOfLines={1}
+                     ellipsizeMode='tail'
+                     >
+                        {item.message}
+                     </Text>
                 </View>
 
                 {!item.read && !selectionMode && <View style={styles.unreadIndicator} />}
